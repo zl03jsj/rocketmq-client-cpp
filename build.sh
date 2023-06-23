@@ -212,7 +212,8 @@ BuildOpenSSL() {
   if [ -e ${fname_openssl} ]; then
     echo "${fname_openssl} exists"
   else
-    wget https://www.openssl.org/source/old/1.1.1/${fname_openssl_down} -O ${fname_openssl_down} --no-check-certificate
+    cp ${basepath}/${fname_openssl_down} ${basepath}/${down_dir}/
+    #wget https://www.openssl.org/source/old/1.1.1/${fname_openssl_down} -O ${fname_openssl_down} --no-check-certificate
   fi
   tar -zxvf ${fname_openssl} &> unzipopenssl.txt
   if [ $? -ne 0 ]; then
@@ -226,9 +227,9 @@ BuildOpenSSL() {
   fi
   echo "build openssl static #####################"
   if [ $verbose -eq 0 ]; then
-    ./config shared CFLAGS=-fPIC CPPFLAGS=-fPIC --prefix=${install_lib_dir} --openssldir=${install_lib_dir} &> opensslconfig.txt
+    ./Configure darwin64-arm64-cc shared no-asm CFLAGS=-fPIC CPPFLAGS=-fPIC --prefix=${install_lib_dir} --openssldir=${install_lib_dir} &> opensslconfig.txt
   else
-    ./config shared CFLAGS=-fPIC CPPFLAGS=-fPIC --prefix=${install_lib_dir} --openssldir=${install_lib_dir}
+    ./Configure darwin64-arm64-cc shared no-asm CFLAGS=-fPIC CPPFLAGS=-fPIC --prefix=${install_lib_dir} --openssldir=${install_lib_dir}
   fi
   if [ $? -ne 0 ]; then
     exit 1
@@ -409,7 +410,7 @@ BuildRocketMQClient() {
   else
       ROCKETMQ_CMAKE_FLAG=$ROCKETMQ_CMAKE_FLAG" -DCMAKE_BUILD_TYPE=Release"
   fi
-  cmake .. $ROCKETMQ_CMAKE_FLAG
+  cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .. $ROCKETMQ_CMAKE_FLAG
   if [ $verbose -eq 0 ]; then
     echo "build rocketmq without detail log."
     make -j $cpu_num &> buildclient.txt
